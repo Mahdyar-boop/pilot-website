@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mahdyar Shirazifarashah — Research Fellow | Readers & Transmission Dataset</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fcfbfa;
+    --card-bg: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #665c54;
+    --border: #e6e1da;
+    --accent: #2c3e50;
+    --cream: #f4f0eb;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 4rem;
+  }
+
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  header.site-nav {
+    border-bottom: 1px solid var(--border);
+    background: var(--card-bg);
+    padding: 1rem 0;
+    margin-bottom: 3rem;
+  }
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .home-link {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .badge {
+    font-size: 0.8rem;
+    background: var(--cream);
+    padding: 4px 10px;
+    border-radius: 20px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .hero {
+    margin-bottom: 3rem;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  .subtitle {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 700px;
+  }
+
+  .explorer-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  }
+  .search-box {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fff;
+  }
+  .search-box:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.08);
+  }
+
+  .items-container {
+    max-height: 500px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-right: 4px;
+  }
+  .data-item {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    padding: 1.25rem;
+    border-radius: 6px;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .data-item:hover {
+    transform: translateY(-1px);
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .item-meta {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+    font-weight: 700;
+  }
+  .item-text {
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+
+  .state-msg {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+  
+  footer {
+    margin-top: 4rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <div class="wrap nav-row">
+    <a class="home-link" href="index.html">Mahdyar Shirazifarashah</a>
+    <span class="badge">Readers Dataset Explorer</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Canonical & Historical Readers</h1>
+    <p class="subtitle">
+      Digital scholarly interface exploring transmission traditions and reading variants sourced directly from <code style="background:var(--cream); padding:2px 6px; border-radius:4px;">data/readers.xml</code>.
+    </p>
+  </section>
+
+  <div class="explorer-card">
+    <input type="text" id="searchInput" class="search-box" placeholder="Search readers, variants, or text data...">
+    
+    <div id="resultsArea" class="items-container">
+      <div class="state-msg">Loading readers dataset...</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    University of Groningen · Digital Humanities Research
+  </div>
+</footer>
+
+<script>
+(function(){
+  const xmlFilePath = 'data/readers.xml';
+  const container = document.getElementById('resultsArea');
+  const searchInput = document.getElementById('searchInput');
+  
+  let datasetEntries = [];
+
+  // خواندن فایل XML با استفاده از Fetch API
+  fetch(xmlFilePath)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(xmlString => {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+      
+      // بررسی خطاهای ساختاری XML
+      const parseError = xmlDoc.querySelector("parsererror");
+      if (parseError) {
+        throw new Error("Invalid XML format.");
+      }
+
+      // استخراج تگ‌ها (می‌تواند شامل <reader>، <item>، <entry> یا هر تگ دیگری باشد)
+      let nodes = xmlDoc.getElementsByTagName('reader');
+      if (nodes.length === 0) nodes = xmlDoc.getElementsByTagName('item');
+      if (nodes.length === 0) nodes = xmlDoc.getElementsByTagName('entry');
+      if (nodes.length === 0) nodes = xmlDoc.getElementsByTagName('*'); // حالت عمومی
+
+      datasetEntries = [];
+      for (let i = 0; i < nodes.length; i++) {
+        let textContent = nodes[i].textContent.trim();
+        let tagName = nodes[i].nodeName;
+        
+        // فیلتر کردن گره‌های خالی یا ریشه اصلی سند
+        if (textContent.length > 0 && textContent.length < 1000 && tagName !== 'parsererror' && tagName !== 'html' && tagName !== nodes[0].ownerDocument.documentElement.nodeName) {
+          datasetEntries.push({
+            tag: tagName,
+            text: textContent
+          });
+        }
+      }
+
+      if (datasetEntries.length === 0) {
+        container.innerHTML = `<div class="state-msg">Dataset loaded successfully, but no child records found inside <code style="background:var(--cream); padding:2px 4px;">readers.xml</code>.</div>`;
+        return;
+      }
+
+      // رندر اولیه لیست
+      renderList(datasetEntries);
+
+      // پیاده‌سازی جستجوی زنده (Live Search)
+      searchInput.addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase().trim();
+        if (!query) {
+          renderList(datasetEntries);
+          return;
+        }
+        
+        const filtered = datasetEntries.filter(item => 
+          item.text.toLowerCase().includes(query) || item.tag.toLowerCase().includes(query)
+        );
+        renderList(filtered);
+      });
+
+    })
+    .catch(error => {
+      console.error(error);
+      container.innerHTML = `
+        <div class="state-msg" style="color: #c0392b;">
+          <strong>Unable to load dataset:</strong> Make sure <code style="background:#fadbd8; padding:2px 6px;">data/readers.xml</code> exists in your repository.<br><br>
+          <a href="${xmlFilePath}" target="_blank" style="color: #2980b9; text-decoration: underline;">Click here to test opening readers.xml directly</a>
+        </div>`;
+    });
+
+  function renderList(items) {
+    if (items.length === 0) {
+      container.innerHTML = '<div class="state-msg">No matching records found in the dataset.</div>';
+      return;
+    }
+
+    let html = '';
+    const limit = Math.min(items.length, 200);
+    for (let i = 0; i < limit; i++) {
+      html += `
+        <div class="data-item">
+          <div class="item-meta">Element: &lt;${items[i].tag}&gt;</div>
+          <div class="item-text">${escapeHtml(items[i].text)}</div>
+        </div>
+      `;
+    }
+    
+    if (items.length > 200) {
+      html += `<div style="text-align: center; padding: 1rem; font-size: 0.85rem; color: var(--text-muted);">Showing first 200 of ${items.length} entries. Use search to filter.</div>`;
+    }
+    
+    container.innerHTML = html;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+})();
+</script>
+
+</body>
+</html>
